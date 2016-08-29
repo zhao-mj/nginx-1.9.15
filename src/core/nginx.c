@@ -312,8 +312,9 @@ main(int argc, char *const *argv)
 
         return 0;
     }
-
+    //信号
     if (ngx_signal) {
+        //ngx_signal_process位于 ngx_cycle.c
         return ngx_signal_process(cycle, ngx_signal);
     }
 
@@ -411,7 +412,7 @@ ngx_show_version_info(void)
                                "file" NGX_LINEFEED NGX_LINEFEED
         );
     }
-
+    //显示配置
     if (ngx_show_configure) {
 
 #ifdef NGX_COMPILER
@@ -719,11 +720,13 @@ ngx_get_options(int argc, char *const *argv)
 
             case '?':
             case 'h':
+                //显示版本、帮助
                 ngx_show_version = 1;
                 ngx_show_help = 1;
                 break;
 
             case 'v':
+                //显示版本
                 ngx_show_version = 1;
                 break;
 
@@ -760,6 +763,7 @@ ngx_get_options(int argc, char *const *argv)
                 return NGX_ERROR;
 
             case 'c':
+                //配置文件
                 if (*p) {
                     ngx_conf_file = p;
                     goto next;
@@ -825,7 +829,7 @@ ngx_get_options(int argc, char *const *argv)
     return NGX_OK;
 }
 
-
+//将变量信息保存至ngx_argv
 static ngx_int_t
 ngx_save_argv(ngx_cycle_t *cycle, int argc, char *const *argv)
 {
@@ -927,7 +931,7 @@ ngx_process_options(ngx_cycle_t *cycle)
 
 #endif
     }
-
+    //配置文件
     if (ngx_conf_file) {
         cycle->conf_file.len = ngx_strlen(ngx_conf_file);
         cycle->conf_file.data = ngx_conf_file;

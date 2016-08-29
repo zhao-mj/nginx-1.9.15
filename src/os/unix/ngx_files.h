@@ -368,9 +368,9 @@ size_t ngx_fs_bsize(u_char *name);
 #endif
 
 
-#define ngx_stdout               STDOUT_FILENO
-#define ngx_stderr               STDERR_FILENO
-#define ngx_set_stderr(fd)       dup2(fd, STDERR_FILENO)
+#define ngx_stdout               STDOUT_FILENO //输出描述符
+#define ngx_stderr               STDERR_FILENO //系统标准错误输出描述符
+#define ngx_set_stderr(fd)       dup2(fd, STDERR_FILENO) //将标准错误输出重定向至fd
 #define ngx_set_stderr_n         "dup2(STDERR_FILENO)"
 
 

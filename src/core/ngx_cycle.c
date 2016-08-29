@@ -1019,18 +1019,18 @@ ngx_signal_process(ngx_cycle_t *cycle, char *sig)
 
     file.name = ccf->pid;
     file.log = cycle->log;
-
+    //fd描述符
     file.fd = ngx_open_file(file.name.data, NGX_FILE_RDONLY,
                             NGX_FILE_OPEN, NGX_FILE_DEFAULT_ACCESS);
-
+    //打开文件失败
     if (file.fd == NGX_INVALID_FILE) {
         ngx_log_error(NGX_LOG_ERR, cycle->log, ngx_errno,
                       ngx_open_file_n " \"%s\" failed", file.name.data);
         return 1;
     }
-
+    //读取文件内容
     n = ngx_read_file(&file, buf, NGX_INT64_LEN + 2, 0);
-
+    //关闭文件
     if (ngx_close_file(file.fd) == NGX_FILE_ERROR) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       ngx_close_file_n " \"%s\" failed", file.name.data);

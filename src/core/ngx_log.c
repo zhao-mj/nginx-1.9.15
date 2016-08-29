@@ -279,7 +279,8 @@ ngx_log_stderr(ngx_err_t err, const char *fmt, ...)
     }
 
     ngx_linefeed(p);
-
+    //ngx_write_console位于 os/unix/ngx_files.h
+    //输出错误信息
     (void) ngx_write_console(ngx_stderr, errstr, p - errstr);
 }
 
@@ -329,10 +330,11 @@ ngx_log_init(u_char *prefix)
      * we use ngx_strlen() here since BCC warns about
      * condition is always false and unreachable code
      */
-
+    //日志文件
     nlen = ngx_strlen(name);
 
     if (nlen == 0) {
+        //如果未设置日志路径，则使用系统标准的错误
         ngx_log_file.fd = ngx_stderr;
         return &ngx_log;
     }
@@ -340,9 +342,11 @@ ngx_log_init(u_char *prefix)
     p = NULL;
 
 #if (NGX_WIN32)
+    //windows操作系统
     if (name[1] != ':') {
 #else
-    if (name[0] != '/') {
+    //其他操作系统
+    if (name[0] != '/') { //非绝对路径
 #endif
 
         if (prefix) {
@@ -375,12 +379,14 @@ ngx_log_init(u_char *prefix)
         }
     }
 
-    //设置文件描述符
+    //打开日志文件 
+    //ngx_open_file位于 os/unix/ngx_files.h
     ngx_log_file.fd = ngx_open_file(name, NGX_FILE_APPEND,
                                     NGX_FILE_CREATE_OR_OPEN,
                                     NGX_FILE_DEFAULT_ACCESS);
-
+    //打开失败
     if (ngx_log_file.fd == NGX_INVALID_FILE) {
+        //输错错误日志
         ngx_log_stderr(ngx_errno,
                        "[alert] could not open error log file: "
                        ngx_open_file_n " \"%s\" failed", name);
@@ -389,7 +395,7 @@ ngx_log_init(u_char *prefix)
                        "could not open error log file: "
                        ngx_open_file_n " \"%s\" failed", name);
 #endif
-
+        //使用系统标准错误输出描述符 ngx_stderr定义位于 os/unix/ngx_files.h
         ngx_log_file.fd = ngx_stderr;
     }
 
