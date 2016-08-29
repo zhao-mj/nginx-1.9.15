@@ -93,7 +93,7 @@ typedef struct {
     ngx_uint_t        hash;
     ngx_str_t         key;
     ngx_str_t         value;
-    u_char           *lowcase_key;
+    u_char           *lowcase_key; //全小写
 } ngx_table_elt_t;
 
 

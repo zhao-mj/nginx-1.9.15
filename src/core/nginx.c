@@ -364,11 +364,11 @@ main(int argc, char *const *argv)
 
     ngx_use_stderr = 0;
 
-    if (ngx_process == NGX_PROCESS_SINGLE) {
+    if (ngx_process == NGX_PROCESS_SINGLE) { //单进程
         //ngx_process_cycle.c
         ngx_single_process_cycle(cycle);
 
-    } else {
+    } else {                           //多进程
         //ngx_process_cycle.c
         ngx_master_process_cycle(cycle);
     }
