@@ -7,6 +7,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
+//根据用户设置绑定CPU
 
 #if (NGX_HAVE_CPUSET_SETAFFINITY)
 

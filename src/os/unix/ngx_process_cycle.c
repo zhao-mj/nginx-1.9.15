@@ -127,6 +127,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
 
+    //创建N个子进程（N == ccf->worker_processes）
     ngx_start_worker_processes(cycle, ccf->worker_processes,
                                NGX_PROCESS_RESPAWN);
     ngx_start_cache_manager_processes(cycle, 0);
@@ -852,6 +853,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
         }
     }
 
+    //是否绑定cpu
     if (worker >= 0) {
         cpu_affinity = ngx_get_cpu_affinity(worker);
 
