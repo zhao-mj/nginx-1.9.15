@@ -14,15 +14,15 @@
 
 
 typedef struct {
-    size_t      len;  //字符串长度
-    u_char     *data; //字符串内容
+    size_t      len;
+    u_char     *data;
 } ngx_str_t;
 
 
 typedef struct {
     ngx_str_t   key;
     ngx_str_t   value;
-} ngx_keyval_t; //key->value
+} ngx_keyval_t;
 
 
 typedef struct {
