@@ -44,7 +44,7 @@ ngx_os_init(ngx_log_t *log)
     if (ngx_init_setproctitle(log) != NGX_OK) {
         return NGX_ERROR;
     }
-
+    //获取系统内存分页大小
     ngx_pagesize = getpagesize();
     ngx_cacheline_size = NGX_CPU_CACHE_LINE;
 
@@ -59,9 +59,10 @@ ngx_os_init(ngx_log_t *log)
     if (ngx_ncpu < 1) {
         ngx_ncpu = 1;
     }
-
+    //调用ngx_cpuinfo获取ngx_cacheline_size值（ngx_cacheline_size：cpu二级缓存大小）
+    
     ngx_cpuinfo();
-
+    //获取socket最大连接数
     if (getrlimit(RLIMIT_NOFILE, &rlmt) == -1) {
         ngx_log_error(NGX_LOG_ALERT, log, errno,
                       "getrlimit(RLIMIT_NOFILE) failed");

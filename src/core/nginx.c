@@ -193,7 +193,6 @@ main(int argc, char *const *argv)
     ngx_conf_dump_t  *cd;
     ngx_core_conf_t  *ccf;
 
-    //初始化日志
     ngx_debug_init();
 
     if (ngx_strerror_init() != NGX_OK) {
@@ -213,7 +212,7 @@ main(int argc, char *const *argv)
     }
 
     /* TODO */ ngx_max_sockets = -1;
-
+    // core/ngx_times.c
     ngx_time_init();
 
 #if (NGX_PCRE)
@@ -248,7 +247,7 @@ main(int argc, char *const *argv)
     if (init_cycle.pool == NULL) {
         return 1;
     }
-    //保存配置
+    //保存参数
     if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
         return 1;
     }
@@ -256,7 +255,7 @@ main(int argc, char *const *argv)
     if (ngx_process_options(&init_cycle) != NGX_OK) {
         return 1;
     }
-
+    //获取系统配置,cpu、单个进程打开的最大文件数、内存分页大小等等
     if (ngx_os_init(log) != NGX_OK) {
         return 1;
     }
@@ -264,7 +263,7 @@ main(int argc, char *const *argv)
     /*
      * ngx_crc32_table_init() requires ngx_cacheline_size set in ngx_os_init()
      */
-
+     //ngx_crc32.c
     if (ngx_crc32_table_init() != NGX_OK) {
         return 1;
     }
@@ -272,7 +271,7 @@ main(int argc, char *const *argv)
     if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {
         return 1;
     }
-
+    //初始化模块 core、http、mail
     if (ngx_preinit_modules() != NGX_OK) {
         return 1;
     }
@@ -440,13 +439,17 @@ ngx_show_version_info(void)
 }
 
 
+//该函数通过解析环境变量NGINX_VAR="NGINX"，将其中的socket number保存至ngx_cycle.listening数组，该数组元素类型为ngx_listening_t。
+//这些socekts在环境变量中以':'或';'隔开。
+//例如，为调试方便，设环境变量NGINX为如下值
+//export NGINX="16000:16500:16600;"
 static ngx_int_t
 ngx_add_inherited_sockets(ngx_cycle_t *cycle)
 {
     u_char           *p, *v, *inherited;
     ngx_int_t         s;
     ngx_listening_t  *ls;
-
+    //获取NGINX环境变量配置
     inherited = (u_char *) getenv(NGINX_VAR);
 
     if (inherited == NULL) {
@@ -457,7 +460,7 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
                   "using inherited sockets from \"%s\"", inherited);
 
     if (ngx_array_init(&cycle->listening, cycle->pool, 10,
-                       sizeof(ngx_listening_t))
+                       sizeof(ngx_listening_t)) // 初始化ngx_cycle.listening数组, 10个元素空间
         != NGX_OK)
     {
         return NGX_ERROR;
@@ -494,7 +497,8 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
     }
 
     ngx_inherited = 1;
-
+    //ngx_set_inherited_sockets位于ngx_connection.c
+    //设置listening数组每个元素各字段值
     return ngx_set_inherited_sockets(cycle);
 }
 

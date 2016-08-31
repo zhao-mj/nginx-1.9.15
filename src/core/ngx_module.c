@@ -26,7 +26,7 @@ ngx_int_t
 ngx_preinit_modules(void)
 {
     ngx_uint_t  i;
-
+    //ngx_modules值定义位于编译后的objs/ngx_modules.c文件
     for (i = 0; ngx_modules[i]; i++) {
         ngx_modules[i]->index = i;
         ngx_modules[i]->name = ngx_module_names[i];
