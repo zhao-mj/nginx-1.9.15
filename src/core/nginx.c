@@ -328,7 +328,8 @@ main(int argc, char *const *argv)
     }
 
 #if !(NGX_WIN32)
-
+    //初始化信号
+    //os/unix/ngx_process.c
     if (ngx_init_signals(cycle->log) != NGX_OK) {
         return 1;
     }
@@ -1374,7 +1375,7 @@ ngx_set_cpu_affinity(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     return NGX_CONF_OK;
 }
 
-
+//获取N对应的cpu编号
 ngx_cpuset_t *
 ngx_get_cpu_affinity(ngx_uint_t n)
 {

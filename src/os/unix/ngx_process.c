@@ -36,7 +36,7 @@ ngx_socket_t     ngx_channel;
 ngx_int_t        ngx_last_process;
 ngx_process_t    ngx_processes[NGX_MAX_PROCESSES];
 
-
+//信号数组
 ngx_signal_t  signals[] = {
     { ngx_signal_value(NGX_RECONFIGURE_SIGNAL),
       "SIG" ngx_value(NGX_RECONFIGURE_SIGNAL),
@@ -283,7 +283,7 @@ ngx_execute_proc(ngx_cycle_t *cycle, void *data)
     exit(1);
 }
 
-
+//初始化信号
 ngx_int_t
 ngx_init_signals(ngx_log_t *log)
 {
@@ -294,6 +294,7 @@ ngx_init_signals(ngx_log_t *log)
         ngx_memzero(&sa, sizeof(struct sigaction));
         sa.sa_handler = sig->handler;
         sigemptyset(&sa.sa_mask);
+        //设置信号
         if (sigaction(sig->signo, &sa, NULL) == -1) {
 #if (NGX_VALGRIND)
             ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
@@ -309,7 +310,7 @@ ngx_init_signals(ngx_log_t *log)
     return NGX_OK;
 }
 
-
+//信号处理函数
 void
 ngx_signal_handler(int signo)
 {
@@ -444,7 +445,7 @@ ngx_signal_handler(int signo)
                       "you should shutdown or terminate "
                       "before either old or new binary's process");
     }
-
+    //子进程信号
     if (signo == SIGCHLD) {
         ngx_process_get_status();
     }

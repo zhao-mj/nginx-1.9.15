@@ -84,6 +84,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     ngx_listening_t   *ls;
     ngx_core_conf_t   *ccf;
 
+    //设置信号
     sigemptyset(&set);
     sigaddset(&set, SIGCHLD);
     sigaddset(&set, SIGALRM);
@@ -356,7 +357,7 @@ ngx_start_worker_processes(ngx_cycle_t *cycle, ngx_int_t n, ngx_int_t type)
 
     for (i = 0; i < n; i++) {
         //创建n个子进程
-        //ngx_process.c
+        // ./ngx_process.c
         ngx_spawn_process(cycle, ngx_worker_process_cycle,
                           (void *) (intptr_t) i, "worker process", type);
         //保存当前worker进程的信息
@@ -471,7 +472,7 @@ ngx_signal_worker_processes(ngx_cycle_t *cycle, int signo)
 #else
 
     switch (signo) {
-
+    //退出
     case ngx_signal_value(NGX_SHUTDOWN_SIGNAL):
         ch.command = NGX_CMD_QUIT;
         break;
@@ -479,7 +480,7 @@ ngx_signal_worker_processes(ngx_cycle_t *cycle, int signo)
     case ngx_signal_value(NGX_TERMINATE_SIGNAL):
         ch.command = NGX_CMD_TERMINATE;
         break;
-
+        
     case ngx_signal_value(NGX_REOPEN_SIGNAL):
         ch.command = NGX_CMD_REOPEN;
         break;
@@ -535,7 +536,7 @@ ngx_signal_worker_processes(ngx_cycle_t *cycle, int signo)
 
         ngx_log_debug2(NGX_LOG_DEBUG_CORE, cycle->log, 0,
                        "kill (%P, %d)", ngx_processes[i].pid, signo);
-
+        //kill子进程
         if (kill(ngx_processes[i].pid, signo) == -1) {
             err = ngx_errno;
             ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
@@ -726,7 +727,7 @@ ngx_master_process_exit(ngx_cycle_t *cycle)
     exit(0);
 }
 
-
+//worker进程处理函数
 static void
 ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 {
@@ -740,7 +741,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     ngx_setproctitle("worker process");
 
     for ( ;; ) {
-
+        //退出操作
         if (ngx_exiting) {
             ngx_event_cancel_timers();
 
@@ -769,6 +770,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
             ngx_setproctitle("worker process is shutting down");
 
             if (!ngx_exiting) {
+                //设置退出标识
                 ngx_exiting = 1;
                 ngx_close_listening_sockets(cycle);
                 ngx_close_idle_connections(cycle);
@@ -947,7 +949,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
     }
 }
 
-
+//work进程退出
 static void
 ngx_worker_process_exit(ngx_cycle_t *cycle)
 {
