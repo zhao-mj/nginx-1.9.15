@@ -22,7 +22,7 @@ ngx_setaffinity(ngx_cpuset_t *cpu_affinity, ngx_log_t *log)
                           "cpuset_setaffinity(): using cpu #%ui", i);
         }
     }
-
+    //cpu亲和性
     if (cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1,
                            sizeof(cpuset_t), cpu_affinity) == -1)
     {

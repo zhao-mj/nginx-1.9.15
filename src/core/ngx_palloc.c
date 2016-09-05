@@ -14,7 +14,7 @@ static ngx_inline void *ngx_palloc_small(ngx_pool_t *pool, size_t size,
 static void *ngx_palloc_block(ngx_pool_t *pool, size_t size);
 static void *ngx_palloc_large(ngx_pool_t *pool, size_t size);
 
-
+//创建内存池大小
 ngx_pool_t *
 ngx_create_pool(size_t size, ngx_log_t *log)
 {
@@ -24,13 +24,19 @@ ngx_create_pool(size_t size, ngx_log_t *log)
     if (p == NULL) {
         return NULL;
     }
-
-    p->d.last = (u_char *) p + sizeof(ngx_pool_t);
-    p->d.end = (u_char *) p + size;
-    p->d.next = NULL;
-    p->d.failed = 0;
+    /** 
+    * Nginx会分配一块大内存，其中内存头部存放ngx_pool_t本身内存池的数据结构 
+    * p->d: 存放内存池的数据 (适合小于p->max的内存块存储).
+    * p->large: 存放大内存块列表.
+    * p->cleanup: 存放可以被回调函数清理的内存块 (该内存块不一定会在内存池上面分配).
+    */ 
+    p->d.last = (u_char *) p + sizeof(ngx_pool_t); //内存开始地址，指向ngx_pool_t结构体之后数据取起始位置  
+    p->d.end = (u_char *) p + size; //内存结束地址 
+    p->d.next = NULL; //下一个ngx_pool_t 内存池地址  
+    p->d.failed = 0; //失败次数 
 
     size = size - sizeof(ngx_pool_t);
+
     p->max = (size < NGX_MAX_ALLOC_FROM_POOL) ? size : NGX_MAX_ALLOC_FROM_POOL;
 
     p->current = p;
@@ -42,14 +48,14 @@ ngx_create_pool(size_t size, ngx_log_t *log)
     return p;
 }
 
-
+//销毁内存池
 void
 ngx_destroy_pool(ngx_pool_t *pool)
 {
     ngx_pool_t          *p, *n;
     ngx_pool_large_t    *l;
     ngx_pool_cleanup_t  *c;
-
+    //遍历pool->cleanup,调用回调函数逐个清理
     for (c = pool->cleanup; c; c = c->next) {
         if (c->handler) {
             ngx_log_debug1(NGX_LOG_DEBUG_ALLOC, pool->log, 0,
@@ -79,13 +85,13 @@ ngx_destroy_pool(ngx_pool_t *pool)
     }
 
 #endif
-
+    //清理pool->large链表 (pool->large为单独的大数据内存块)  
     for (l = pool->large; l; l = l->next) {
         if (l->alloc) {
             ngx_free(l->alloc);
         }
     }
-
+    //释放内存池pool->d数据链表
     for (p = pool, n = pool->d.next; /* void */; p = n, n = n->d.next) {
         ngx_free(p);
 
@@ -119,6 +125,7 @@ ngx_reset_pool(ngx_pool_t *pool)
 }
 
 
+//分配一块内存
 void *
 ngx_palloc(ngx_pool_t *pool, size_t size)
 {
@@ -155,11 +162,12 @@ ngx_palloc_small(ngx_pool_t *pool, size_t size, ngx_uint_t align)
 
     do {
         m = p->d.last;
-
+        //是否选择内存对齐
         if (align) {
+            //对齐操作,会损失内存，但是提高内存使用速度
             m = ngx_align_ptr(m, NGX_ALIGNMENT);
         }
-
+        //剩余空间>size，则直接分配
         if ((size_t) (p->d.end - m) >= size) {
             p->d.last = m + size;
 
