@@ -33,7 +33,7 @@ ngx_create_pool(size_t size, ngx_log_t *log)
     p->d.last = (u_char *) p + sizeof(ngx_pool_t); //内存开始地址，指向ngx_pool_t结构体之后数据取起始位置  
     p->d.end = (u_char *) p + size; //内存结束地址 
     p->d.next = NULL; //下一个ngx_pool_t 内存池地址  
-    p->d.failed = 0; //失败次数 
+    p->d.failed = 0; 
 
     size = size - sizeof(ngx_pool_t);
 
@@ -177,20 +177,20 @@ ngx_palloc_small(ngx_pool_t *pool, size_t size, ngx_uint_t align)
         p = p->d.next;
 
     } while (p);
-
+    //如果内存池空间大小<size,则新建一个pool节点
     return ngx_palloc_block(pool, size);
 }
 
-
+//申请新的缓存池
 static void *
 ngx_palloc_block(ngx_pool_t *pool, size_t size)
 {
     u_char      *m;
     size_t       psize;
     ngx_pool_t  *p, *new;
-
+    //缓存池大小
     psize = (size_t) (pool->d.end - (u_char *) pool);
-
+    //申请新内存块
     m = ngx_memalign(NGX_POOL_ALIGNMENT, psize, pool->log);
     if (m == NULL) {
         return NULL;
@@ -201,23 +201,25 @@ ngx_palloc_block(ngx_pool_t *pool, size_t size)
     new->d.end = m + psize;
     new->d.next = NULL;
     new->d.failed = 0;
-
+    //分配size大小的内存块，返回m指针地址
+    //注：只有第一个内存池last的指针指向是ngx_pool_t结构之后的起始位置，其他内存池last指向 ngx_pool_data_t 结构之后的位置，也就是说其他内存池只使用了ngx_pool_data_t结构  
     m += sizeof(ngx_pool_data_t);
     m = ngx_align_ptr(m, NGX_ALIGNMENT);
     new->d.last = m + size;
 
     for (p = pool->current; p->d.next; p = p->d.next) {
+         //失败4次以上移动current指针
         if (p->d.failed++ > 4) {
-            pool->current = p->d.next;
+            pool->current = p->d.next; 
         }
     }
-
+    //挂载新的内存池
     p->d.next = new;
-
+    //返回内存池
     return m;
 }
 
-
+//申请一块大内存(size > pool->max)
 static void *
 ngx_palloc_large(ngx_pool_t *pool, size_t size)
 {
@@ -231,7 +233,7 @@ ngx_palloc_large(ngx_pool_t *pool, size_t size)
     }
 
     n = 0;
-
+    //遍历 pool->large 链表 检查是否存在已释放的数据块，最多遍历3次 
     for (large = pool->large; large; large = large->next) {
         if (large->alloc == NULL) {
             large->alloc = p;
@@ -242,13 +244,14 @@ ngx_palloc_large(ngx_pool_t *pool, size_t size)
             break;
         }
     }
-
+    //从内存池申请 一个 ngx_pool_large_t结构空间
+    //注: 此处将新ngx_pool_large_t结构保存在内存池中.
     large = ngx_palloc_small(pool, sizeof(ngx_pool_large_t), 1);
     if (large == NULL) {
         ngx_free(p);
         return NULL;
     }
-
+    //添加至表头
     large->alloc = p;
     large->next = pool->large;
     pool->large = large;
@@ -281,7 +284,7 @@ ngx_pmemalign(ngx_pool_t *pool, size_t size, size_t alignment)
     return p;
 }
 
-
+//清理 pool->larger结构内存
 ngx_int_t
 ngx_pfree(ngx_pool_t *pool, void *p)
 {
