@@ -318,7 +318,7 @@ ngx_pcalloc(ngx_pool_t *pool, size_t size)
     return p;
 }
 
-
+//注册内存回收回调函数
 ngx_pool_cleanup_t *
 ngx_pool_cleanup_add(ngx_pool_t *p, size_t size)
 {
@@ -349,7 +349,7 @@ ngx_pool_cleanup_add(ngx_pool_t *p, size_t size)
     return c;
 }
 
-
+// 清除 p->cleanup的内存块，关闭文件描述符
 void
 ngx_pool_run_cleanup_file(ngx_pool_t *p, ngx_fd_t fd)
 {
@@ -362,6 +362,7 @@ ngx_pool_run_cleanup_file(ngx_pool_t *p, ngx_fd_t fd)
             cf = c->data;
 
             if (cf->fd == fd) {
+                //回调注册的回收方法
                 c->handler(cf);
                 c->handler = NULL;
                 return;
@@ -370,7 +371,7 @@ ngx_pool_run_cleanup_file(ngx_pool_t *p, ngx_fd_t fd)
     }
 }
 
-
+//关闭文件
 void
 ngx_pool_cleanup_file(void *data)
 {
@@ -385,7 +386,7 @@ ngx_pool_cleanup_file(void *data)
     }
 }
 
-
+//删除文件，并关闭描述符
 void
 ngx_pool_delete_file(void *data)
 {
