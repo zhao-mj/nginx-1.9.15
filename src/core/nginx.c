@@ -154,7 +154,7 @@ static ngx_core_module_t  ngx_core_module_ctx = {
     ngx_core_module_init_conf
 };
 
-
+//core模块
 ngx_module_t  ngx_core_module = {
     NGX_MODULE_V1,
     &ngx_core_module_ctx,                  /* module context */
@@ -272,6 +272,7 @@ main(int argc, char *const *argv)
         return 1;
     }
     //初始化模块 core、http、mail
+    //ngx_module.c
     if (ngx_preinit_modules() != NGX_OK) {
         return 1;
     }
@@ -973,7 +974,7 @@ ngx_process_options(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
-
+//core/ngx_cycle.c回调
 static void *
 ngx_core_module_create_conf(ngx_cycle_t *cycle)
 {

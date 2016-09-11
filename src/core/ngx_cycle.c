@@ -211,7 +211,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     ngx_strlow(cycle->hostname.data, (u_char *) hostname, cycle->hostname.len);
 
-
+    //core/ngx_module.c
     if (ngx_cycle_modules(cycle) != NGX_OK) {
         ngx_destroy_pool(pool);
         return NULL;
@@ -219,6 +219,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
 
     for (i = 0; cycle->modules[i]; i++) {
+        //非core模块跳过
         if (cycle->modules[i]->type != NGX_CORE_MODULE) {
             continue;
         }
