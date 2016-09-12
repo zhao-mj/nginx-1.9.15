@@ -63,13 +63,13 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
 
     log = old_cycle->log;
-
+    //创建内存池
     pool = ngx_create_pool(NGX_CYCLE_POOL_SIZE, log);
     if (pool == NULL) {
         return NULL;
     }
     pool->log = log;
-
+    //为cycle分配空间
     cycle = ngx_pcalloc(pool, sizeof(ngx_cycle_t));
     if (cycle == NULL) {
         ngx_destroy_pool(pool);
@@ -270,7 +270,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         ngx_destroy_cycle_pools(&conf);
         return NULL;
     }
-
+    //解析配置文件
     if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {
         environ = senv;
         ngx_destroy_cycle_pools(&conf);
@@ -958,7 +958,7 @@ ngx_create_pidfile(ngx_str_t *name, ngx_log_t *log)
     file.log = log;
 
     create = ngx_test_config ? NGX_FILE_CREATE_OR_OPEN : NGX_FILE_TRUNCATE;
-
+    //创建并打开PID文件
     file.fd = ngx_open_file(file.name.data, NGX_FILE_RDWR,
                             create, NGX_FILE_DEFAULT_ACCESS);
 
@@ -970,12 +970,12 @@ ngx_create_pidfile(ngx_str_t *name, ngx_log_t *log)
 
     if (!ngx_test_config) {
         len = ngx_snprintf(pid, NGX_INT64_LEN + 2, "%P%N", ngx_pid) - pid;
-
+        //写入pid信息
         if (ngx_write_file(&file, pid, len, 0) == NGX_ERROR) {
             return NGX_ERROR;
         }
     }
-
+    //关闭文件
     if (ngx_close_file(file.fd) == NGX_FILE_ERROR) {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
                       ngx_close_file_n " \"%s\" failed", file.name.data);

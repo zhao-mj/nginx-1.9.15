@@ -43,7 +43,7 @@ static ngx_command_t  ngx_core_commands[] = {
       NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
       0,
-      offsetof(ngx_core_conf_t, daemon),
+      offsetof(ngx_core_conf_t, daemon), //daemon偏移量
       NULL },
 
     { ngx_string("master_process"),
@@ -251,7 +251,7 @@ main(int argc, char *const *argv)
     if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
         return 1;
     }
-
+    //初始化配置变量
     if (ngx_process_options(&init_cycle) != NGX_OK) {
         return 1;
     }
@@ -347,7 +347,8 @@ main(int argc, char *const *argv)
     }
 
 #endif
-
+    //将进程ID写入文件中
+    //core/ngx_cycle.c
     if (ngx_create_pidfile(&ccf->pid, cycle->log) != NGX_OK) {
         return 1;
     }
@@ -370,7 +371,7 @@ main(int argc, char *const *argv)
         ngx_single_process_cycle(cycle);
 
     } else {                           //多进程
-        //ngx_process_cycle.c
+        //os/unix/ngx_process_cycle.c
         ngx_master_process_cycle(cycle);
     }
 
@@ -1430,6 +1431,7 @@ ngx_get_cpu_affinity(ngx_uint_t n)
 }
 
 
+//设置开启的子进程数
 static char *
 ngx_set_worker_processes(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {

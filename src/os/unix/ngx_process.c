@@ -339,7 +339,7 @@ ngx_signal_handler(int signo)
     case NGX_PROCESS_SINGLE:
         switch (signo) {
 
-        case ngx_signal_value(NGX_SHUTDOWN_SIGNAL):
+        case ngx_signal_value(NGX_SHUTDOWN_SIGNAL): //对应的命令: nginx -s quit
             ngx_quit = 1;
             action = ", shutting down";
             break;
@@ -356,13 +356,12 @@ ngx_signal_handler(int signo)
                 action = ", stop accepting connections";
             }
             break;
-
-        case ngx_signal_value(NGX_RECONFIGURE_SIGNAL):
+        case ngx_signal_value(NGX_RECONFIGURE_SIGNAL): //对应的命令：nginx -s reload
             ngx_reconfigure = 1;
             action = ", reconfiguring";
             break;
 
-        case ngx_signal_value(NGX_REOPEN_SIGNAL):
+        case ngx_signal_value(NGX_REOPEN_SIGNAL): //对应的命令:nginx -s reopen
             ngx_reopen = 1;
             action = ", reopening logs";
             break;

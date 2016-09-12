@@ -19,7 +19,7 @@ typedef struct ngx_pool_s        ngx_pool_t;  //位于 ngx_palloc.h
 typedef struct ngx_chain_s       ngx_chain_t;
 typedef struct ngx_log_s         ngx_log_t;
 typedef struct ngx_open_file_s   ngx_open_file_t; //位于 ngx_conf_file.h
-typedef struct ngx_command_s     ngx_command_t;
+typedef struct ngx_command_s     ngx_command_t; //位于 ngx_conf_file.h
 typedef struct ngx_file_s        ngx_file_t; // 位于 ngx_file.h
 typedef struct ngx_event_s       ngx_event_t;
 typedef struct ngx_event_aio_s   ngx_event_aio_t;

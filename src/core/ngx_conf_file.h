@@ -79,8 +79,8 @@ struct ngx_command_s {
     ngx_str_t             name; //配置项名称
     ngx_uint_t            type; //配置项类型，包括该配置项可以出现的位置和可以携带参数的个数
     char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf); //回调方法
-    ngx_uint_t            conf; //// 配置文件中的偏移量，确定将该配置项放入哪个存储结构体中
-    ngx_uint_t            offset; //将该配置项放在存储结构体的哪个字段
+    ngx_uint_t            conf; //配置文件中的偏移量，确定将该配置项放入哪个存储结构体中
+    ngx_uint_t            offset; //将该配置参数位于结构体的偏移量
     void                 *post; // 配置项读取后的处理方法
 };
 

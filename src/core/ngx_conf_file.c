@@ -122,7 +122,7 @@ ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename)
     if (filename) {
 
         /* open configuration file */
-
+        //打开配置文件
         fd = ngx_open_file(filename->data, NGX_FILE_RDONLY, NGX_FILE_OPEN, 0);
         if (fd == NGX_INVALID_FILE) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, ngx_errno,
@@ -328,7 +328,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
     name = cf->args->elts;
 
     found = 0;
-
+    //回调各模块的commands进行设置
     for (i = 0; cf->cycle->modules[i]; i++) {
 
         cmd = cf->cycle->modules[i]->commands;
@@ -423,7 +423,7 @@ ngx_conf_handler(ngx_conf_t *cf, ngx_int_t last)
                     conf = confp[cf->cycle->modules[i]->ctx_index];
                 }
             }
-
+            //回调set方法
             rv = cmd->set(cf, cmd, conf);
 
             if (rv == NGX_CONF_OK) {

@@ -201,8 +201,9 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
             continue;
         }
-
+        //退出
         if (ngx_quit) {
+            //向子进程发送退出信号
             ngx_signal_worker_processes(cycle,
                                         ngx_signal_value(NGX_SHUTDOWN_SIGNAL));
 
@@ -219,6 +220,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
             continue;
         }
 
+        //重新加载配置
         if (ngx_reconfigure) {
             ngx_reconfigure = 0;
 
@@ -253,7 +255,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
             ngx_signal_worker_processes(cycle,
                                         ngx_signal_value(NGX_SHUTDOWN_SIGNAL));
         }
-
+        //重启操作
         if (ngx_restart) {
             ngx_restart = 0;
             ngx_start_worker_processes(cycle, ccf->worker_processes,
@@ -261,7 +263,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
             ngx_start_cache_manager_processes(cycle, 0);
             live = 1;
         }
-
+        //重新打开日志文件
         if (ngx_reopen) {
             ngx_reopen = 0;
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "reopening logs");
@@ -357,7 +359,7 @@ ngx_start_worker_processes(ngx_cycle_t *cycle, ngx_int_t n, ngx_int_t type)
 
     for (i = 0; i < n; i++) {
         //创建n个子进程
-        // ./ngx_process.c
+        // os/unix/ngx_process.c
         ngx_spawn_process(cycle, ngx_worker_process_cycle,
                           (void *) (intptr_t) i, "worker process", type);
         //保存当前worker进程的信息
