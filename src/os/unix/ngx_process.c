@@ -38,11 +38,12 @@ ngx_process_t    ngx_processes[NGX_MAX_PROCESSES];
 
 //信号数组
 ngx_signal_t  signals[] = {
+    //nginx -s reload
     { ngx_signal_value(NGX_RECONFIGURE_SIGNAL),
       "SIG" ngx_value(NGX_RECONFIGURE_SIGNAL),
       "reload",
       ngx_signal_handler },
-
+    //nginx -s reopen
     { ngx_signal_value(NGX_REOPEN_SIGNAL),
       "SIG" ngx_value(NGX_REOPEN_SIGNAL),
       "reopen",
