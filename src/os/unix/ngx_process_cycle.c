@@ -84,7 +84,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     ngx_listening_t   *ls;
     ngx_core_conf_t   *ccf;
 
-    //设置信号
+    //设置信号集
     sigemptyset(&set);
     sigaddset(&set, SIGCHLD);
     sigaddset(&set, SIGALRM);
@@ -97,6 +97,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     sigaddset(&set, ngx_signal_value(NGX_SHUTDOWN_SIGNAL));
     sigaddset(&set, ngx_signal_value(NGX_CHANGEBIN_SIGNAL));
 
+    /* 将set信号集中的所有信号设置为延时触发，防止Master进程做事时被干扰 */  
     if (sigprocmask(SIG_BLOCK, &set, NULL) == -1) {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "sigprocmask() failed");
@@ -161,14 +162,14 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
         }
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "sigsuspend");
-
+        //恢复信号
         sigsuspend(&set);
 
         ngx_time_update();
 
         ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                        "wake up, sigio %i", sigio);
-
+        //关闭worker进程
         if (ngx_reap) {
             ngx_reap = 0;
             ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "reap children");
@@ -179,7 +180,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
         if (!live && (ngx_terminate || ngx_quit)) {
             ngx_master_process_exit(cycle);
         }
-
+        //nginx -s stop
         if (ngx_terminate) {
             if (delay == 0) {
                 delay = 50;
@@ -201,7 +202,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
             continue;
         }
-        //退出
+        //nginx -s quit
         if (ngx_quit) {
             //向子进程发送退出信号
             ngx_signal_worker_processes(cycle,
@@ -368,7 +369,7 @@ ngx_start_worker_processes(ngx_cycle_t *cycle, ngx_int_t n, ngx_int_t type)
         ch.slot = ngx_process_slot;
         //channel[0]为父进程的socket，channel[1]为子进程的socket
         ch.fd = ngx_processes[ngx_process_slot].channel[0];
-        //向每一个进程的父进程发送本进程的信息
+        //向每一个子进程发送本进程管道的信息
         ngx_pass_open_channel(cycle, &ch);
     }
 }
@@ -451,7 +452,7 @@ ngx_pass_open_channel(ngx_cycle_t *cycle, ngx_channel_t *ch)
                       ngx_processes[i].channel[0]);
 
         /* TODO: NGX_AGAIN */
-
+        //os/unix/ngx_channel.c
         ngx_write_channel(ngx_processes[i].channel[0],
                           ch, sizeof(ngx_channel_t), cycle->log);
     }
@@ -569,7 +570,7 @@ ngx_reap_children(ngx_cycle_t *cycle)
     ngx_core_conf_t  *ccf;
 
     ngx_memzero(&ch, sizeof(ngx_channel_t));
-
+    //管道关闭命令
     ch.command = NGX_CMD_CLOSE_CHANNEL;
     ch.fd = -1;
 
@@ -614,7 +615,7 @@ ngx_reap_children(ngx_cycle_t *cycle)
                                    ch.slot, ch.pid, ngx_processes[n].pid);
 
                     /* TODO: NGX_AGAIN */
-
+                    //向其他worker进程发送关闭管道命令
                     ngx_write_channel(ngx_processes[n].channel[0],
                                       &ch, sizeof(ngx_channel_t), cycle->log);
                 }
@@ -734,10 +735,10 @@ static void
 ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 {
     ngx_int_t worker = (intptr_t) data;
-
-    ngx_process = NGX_PROCESS_WORKER;
+    //设置系统模式
+    ngx_process = NGX_PROCESS_WORKER;   
     ngx_worker = worker;
-
+    //初始化worker进程
     ngx_worker_process_init(cycle, worker);
 
     ngx_setproctitle("worker process");
@@ -805,14 +806,14 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
     }
 
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
-
+    //设置优先级
     if (worker >= 0 && ccf->priority != 0) {
         if (setpriority(PRIO_PROCESS, 0, ccf->priority) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "setpriority(%d) failed", ccf->priority);
         }
     }
-
+    //设置最大连接数
     if (ccf->rlimit_nofile != NGX_CONF_UNSET) {
         rlmt.rlim_cur = (rlim_t) ccf->rlimit_nofile;
         rlmt.rlim_max = (rlim_t) ccf->rlimit_nofile;
@@ -941,7 +942,9 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
 #if 0
     ngx_last_process = 0;
 #endif
-
+    //注册读取管道内容事件
+    //NGX_READ_EVENT: 读取操作
+    //ngx_channel_handler：回调方法
     if (ngx_add_channel_event(cycle, ngx_channel, NGX_READ_EVENT,
                               ngx_channel_handler)
         == NGX_ERROR)
@@ -1073,7 +1076,7 @@ ngx_channel_handler(ngx_event_t *ev)
             break;
 
         case NGX_CMD_OPEN_CHANNEL:
-
+            //ngx_processes赋值
             ngx_log_debug3(NGX_LOG_DEBUG_CORE, ev->log, 0,
                            "get channel s:%i pid:%P fd:%d",
                            ch.slot, ch.pid, ch.fd);

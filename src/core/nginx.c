@@ -38,10 +38,10 @@ static ngx_conf_enum_t  ngx_debug_points[] = {
 
 
 static ngx_command_t  ngx_core_commands[] = {
-
+    //是否开启守护进程模式
     { ngx_string("daemon"),
       NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
+      ngx_conf_set_flag_slot, //回调方法
       0,
       offsetof(ngx_core_conf_t, daemon), //daemon偏移量
       NULL },
@@ -60,6 +60,7 @@ static ngx_command_t  ngx_core_commands[] = {
       offsetof(ngx_core_conf_t, timer_resolution),
       NULL },
 
+    //保存nginx进程pid文件地址
     { ngx_string("pid"),
       NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
@@ -73,7 +74,7 @@ static ngx_command_t  ngx_core_commands[] = {
       0,
       offsetof(ngx_core_conf_t, lock_file),
       NULL },
-
+    //worker进程数
     { ngx_string("worker_processes"),
       NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
       ngx_set_worker_processes,
@@ -149,9 +150,9 @@ static ngx_command_t  ngx_core_commands[] = {
 
 
 static ngx_core_module_t  ngx_core_module_ctx = {
-    ngx_string("core"),
-    ngx_core_module_create_conf,
-    ngx_core_module_init_conf
+    ngx_string("core"), //name
+    ngx_core_module_create_conf, //create_init
+    ngx_core_module_init_conf //init_conf
 };
 
 //core模块
@@ -256,6 +257,9 @@ main(int argc, char *const *argv)
         return 1;
     }
     //获取系统配置,cpu、单个进程打开的最大文件数、内存分页大小等等
+    //获取内存分页大小：getpagesize()
+    //获取cpu信息：ngx_cpuinfo()
+    //获取单个进程最大连接数：getrlimit()
     if (ngx_os_init(log) != NGX_OK) {
         return 1;
     }
@@ -336,6 +340,8 @@ main(int argc, char *const *argv)
     }
 
     if (!ngx_inherited && ccf->daemon) {
+        //os/unix/ngx_daemon.c
+        //守护进程模式
         if (ngx_daemon(cycle->log) != NGX_OK) {
             return 1;
         }

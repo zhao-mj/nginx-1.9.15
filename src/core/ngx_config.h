@@ -57,8 +57,8 @@
 #define ngx_random               random
 
 /* TODO: #ifndef */
-#define NGX_SHUTDOWN_SIGNAL      QUIT
-#define NGX_TERMINATE_SIGNAL     TERM
+#define NGX_SHUTDOWN_SIGNAL      QUIT //由QUIT字符(通常是Ctrl-\)来控制. 进程在因收到SIGQUIT退出时会产生core文件
+#define NGX_TERMINATE_SIGNAL     TERM //程序结束(terminate)信号, 与SIGKILL不同的是该信号可以被阻塞和处理。通常用来要求程序自己正常退出，shell命令kill缺省产生这个信号。如果进程终止不了，我们才会尝试SIGKILL。
 #define NGX_NOACCEPT_SIGNAL      WINCH
 #define NGX_RECONFIGURE_SIGNAL   HUP
 

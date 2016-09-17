@@ -217,7 +217,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         return NULL;
     }
 
-
+    //创建各模块配置
     for (i = 0; cycle->modules[i]; i++) {
         //非core模块跳过
         if (cycle->modules[i]->type != NGX_CORE_MODULE) {
@@ -623,7 +623,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     }
 
     pool->log = cycle->log;
-
+    //初始化所有模块
     if (ngx_init_modules(cycle) != NGX_OK) {
         /* fatal */
         exit(1);
@@ -1051,7 +1051,8 @@ ngx_signal_process(ngx_cycle_t *cycle, char *sig)
                       n, buf, file.name.data);
         return 1;
     }
-
+    //向nginx进程发送信号
+    //os/unix/ngx_process.c
     return ngx_os_signal_process(cycle, sig, pid);
 
 }

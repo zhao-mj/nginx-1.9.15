@@ -149,14 +149,14 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
 
         //设置异步模式
         on = 1;
-        //FIOASYNC异步输入/输出标志
+        //打开异步模式( FIOASYNC异步输入/输出标志 )
         if (ioctl(ngx_processes[s].channel[0], FIOASYNC, &on) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "ioctl(FIOASYNC) failed while spawning \"%s\"", name);
             ngx_close_channel(ngx_processes[s].channel, cycle->log);
             return NGX_INVALID_PID;
         }
-        //F_SETOWN设置异步I/O的所有者
+        /////设置异步io的所有者 (F_SETOWN设置异步I/O的所有者)
         if (fcntl(ngx_processes[s].channel[0], F_SETOWN, ngx_pid) == -1) {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "fcntl(F_SETOWN) failed while spawning \"%s\"", name);
@@ -179,7 +179,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             ngx_close_channel(ngx_processes[s].channel, cycle->log);
             return NGX_INVALID_PID;
         }
-
+        ///设置当前的子进程的句柄  
         ngx_channel = ngx_processes[s].channel[1];
 
     } else {
@@ -336,8 +336,8 @@ ngx_signal_handler(int signo)
 
     switch (ngx_process) {
 
-    case NGX_PROCESS_MASTER:
-    case NGX_PROCESS_SINGLE:
+    case NGX_PROCESS_MASTER: //master进程
+    case NGX_PROCESS_SINGLE://单进程
         switch (signo) {
 
         case ngx_signal_value(NGX_SHUTDOWN_SIGNAL): //对应的命令: nginx -s quit
@@ -345,7 +345,7 @@ ngx_signal_handler(int signo)
             action = ", shutting down";
             break;
 
-        case ngx_signal_value(NGX_TERMINATE_SIGNAL):
+        case ngx_signal_value(NGX_TERMINATE_SIGNAL): //nginx -s stop
         case SIGINT:
             ngx_terminate = 1;
             action = ", exiting";
@@ -401,7 +401,7 @@ ngx_signal_handler(int signo)
 
         break;
 
-    case NGX_PROCESS_WORKER:
+    case NGX_PROCESS_WORKER: //worker子进程信号
     case NGX_PROCESS_HELPER:
         switch (signo) {
 
@@ -622,6 +622,7 @@ ngx_os_signal_process(ngx_cycle_t *cycle, char *name, ngx_pid_t pid)
 
     for (sig = signals; sig->signo != 0; sig++) {
         if (ngx_strcmp(name, sig->name) == 0) {
+            //执行kill命令
             if (kill(pid, sig->signo) != -1) {
                 return 0;
             }

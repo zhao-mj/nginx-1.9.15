@@ -75,7 +75,7 @@ ngx_write_channel(ngx_socket_t s, ngx_channel_t *ch, size_t size,
     msg.msg_namelen = 0;
     msg.msg_iov = iov;
     msg.msg_iovlen = 1;
-
+    //sendmsg:发送消息
     n = sendmsg(s, &msg, 0);
 
     if (n == -1) {
@@ -91,7 +91,7 @@ ngx_write_channel(ngx_socket_t s, ngx_channel_t *ch, size_t size,
     return NGX_OK;
 }
 
-
+//读取管道内容
 ngx_int_t
 ngx_read_channel(ngx_socket_t s, ngx_channel_t *ch, size_t size, ngx_log_t *log)
 {
@@ -239,7 +239,7 @@ ngx_add_channel_event(ngx_cycle_t *cycle, ngx_fd_t fd, ngx_int_t event,
     return NGX_OK;
 }
 
-
+//关闭管道
 void
 ngx_close_channel(ngx_fd_t *fd, ngx_log_t *log)
 {

@@ -41,12 +41,12 @@ ngx_daemon(ngx_log_t *log)
                       "open(\"/dev/null\") failed");
         return NGX_ERROR;
     }
-
+    //关闭标准输入流
     if (dup2(fd, STDIN_FILENO) == -1) {
         ngx_log_error(NGX_LOG_EMERG, log, ngx_errno, "dup2(STDIN) failed");
         return NGX_ERROR;
     }
-
+    //关闭标准输出流
     if (dup2(fd, STDOUT_FILENO) == -1) {
         ngx_log_error(NGX_LOG_EMERG, log, ngx_errno, "dup2(STDOUT) failed");
         return NGX_ERROR;

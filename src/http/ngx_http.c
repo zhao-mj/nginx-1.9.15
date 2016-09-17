@@ -82,9 +82,9 @@ ngx_str_t  ngx_http_html_default_types[] = {
 
 static ngx_command_t  ngx_http_commands[] = {
 
-    { ngx_string("http"),
-      NGX_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
-      ngx_http_block,
+    { ngx_string("http"),  //name
+      NGX_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,//type
+      ngx_http_block, //解析http模块 set() ，由ngx_cycle.c内部ngx_conf_parse调用
       0,
       0,
       NULL },
