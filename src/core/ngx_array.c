@@ -51,7 +51,7 @@ ngx_array_push(ngx_array_t *a)
     size_t       size;
     ngx_pool_t  *p;
 
-    if (a->nelts == a->nalloc) {
+    if (a->nelts == a->nalloc) { //数据空间已满
 
         /* the array is full */
 
@@ -59,6 +59,7 @@ ngx_array_push(ngx_array_t *a)
 
         p = a->pool;
 
+        //当前数组位于内存池最尾部，且内存池足够分配一个新元素空间
         if ((u_char *) a->elts + size == p->d.last
             && p->d.last + a->size <= p->d.end)
         {
@@ -70,21 +71,22 @@ ngx_array_push(ngx_array_t *a)
             p->d.last += a->size;
             a->nalloc++;
 
-        } else {
+        } else { 
             /* allocate a new array */
-
+            //将数组容量扩大一倍
             new = ngx_palloc(p, 2 * size);
             if (new == NULL) {
                 return NULL;
             }
-
+            //将旧数组的元素copy到新数组中
             ngx_memcpy(new, a->elts, size);
             a->elts = new;
             a->nalloc *= 2;
         }
     }
-
+    //获取新元素的地址
     elt = (u_char *) a->elts + a->size * a->nelts;
+    //数组元素个数+1
     a->nelts++;
 
     return elt;

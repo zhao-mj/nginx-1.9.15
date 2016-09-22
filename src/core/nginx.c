@@ -468,8 +468,9 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
     ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
                   "using inherited sockets from \"%s\"", inherited);
 
+    // 初始化ngx_cycle.listening数组, 申请10个元素空间
     if (ngx_array_init(&cycle->listening, cycle->pool, 10,
-                       sizeof(ngx_listening_t)) // 初始化ngx_cycle.listening数组, 10个元素空间
+                       sizeof(ngx_listening_t)) 
         != NGX_OK)
     {
         return NGX_ERROR;
