@@ -15,7 +15,7 @@ ngx_os_io_t  ngx_io;
 
 static void ngx_drain_connections(void);
 
-
+//创建一个监听对象
 ngx_listening_t *
 ngx_create_listening(ngx_conf_t *cf, void *sockaddr, socklen_t socklen)
 {
@@ -394,7 +394,7 @@ ngx_open_listening_sockets(ngx_cycle_t *cycle)
     log = cycle->log;
 
     /* TODO: configurable try number */
-
+    //尝试5次数
     for (tries = 5; tries; tries--) {
         failed = 0;
 
@@ -444,7 +444,7 @@ ngx_open_listening_sockets(ngx_cycle_t *cycle)
 
                 continue;
             }
-
+            //建立连接
             s = ngx_socket(ls[i].sockaddr->sa_family, ls[i].type, 0);
 
             if (s == (ngx_socket_t) -1) {
@@ -1056,8 +1056,9 @@ ngx_get_connection(ngx_socket_t s, ngx_log_t *log)
 
         return NULL;
     }
-
+    //free_connections指向下一个空连接
     ngx_cycle->free_connections = c->data;
+    //剩余连接数-1
     ngx_cycle->free_connection_n--;
 
     if (ngx_cycle->files && ngx_cycle->files[s] == NULL) {

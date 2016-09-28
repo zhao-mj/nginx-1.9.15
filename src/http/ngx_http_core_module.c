@@ -2975,14 +2975,14 @@ ngx_http_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
     if (ctx->loc_conf == NULL) {
         return NGX_CONF_ERROR;
     }
-
+    //加载HTTP模块
     for (i = 0; cf->cycle->modules[i]; i++) {
         if (cf->cycle->modules[i]->type != NGX_HTTP_MODULE) {
             continue;
         }
 
         module = cf->cycle->modules[i]->ctx;
-
+        //创建server全局配置
         if (module->create_srv_conf) {
             mconf = module->create_srv_conf(cf);
             if (mconf == NULL) {
@@ -2991,7 +2991,7 @@ ngx_http_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
 
             ctx->srv_conf[cf->cycle->modules[i]->ctx_index] = mconf;
         }
-
+        //创建location本地配置
         if (module->create_loc_conf) {
             mconf = module->create_loc_conf(cf);
             if (mconf == NULL) {

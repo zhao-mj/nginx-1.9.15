@@ -225,7 +225,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         }
 
         module = cycle->modules[i]->ctx;
-
+        //创建配置
         if (module->create_conf) {
             rv = module->create_conf(cycle);
             if (rv == NULL) {
@@ -289,7 +289,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         }
 
         module = cycle->modules[i]->ctx;
-
+        //调用NGX_CORE_MODULE类型的 module->init_conf 初始化配置
         if (module->init_conf) {
             if (module->init_conf(cycle,
                                   cycle->conf_ctx[cycle->modules[i]->index])
@@ -606,7 +606,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 #endif
         }
     }
-
+    //core/ngx_connection.c
     if (ngx_open_listening_sockets(cycle) != NGX_OK) {
         goto failed;
     }

@@ -214,12 +214,13 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
 #endif
     }
-
+    //是否使用锁机制
     if (ngx_use_accept_mutex) {
         if (ngx_accept_disabled > 0) {
             ngx_accept_disabled--;
 
         } else {
+            //获取锁（event/ngx_event_accept.c）
             if (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) {
                 return;
             }
@@ -580,8 +581,11 @@ ngx_event_process_init(ngx_cycle_t *cycle)
     ecf = ngx_event_get_conf(cycle->conf_ctx, ngx_event_core_module);
 
     if (ccf->master && ccf->worker_processes > 1 && ecf->accept_mutex) {
+        //使用锁机制
         ngx_use_accept_mutex = 1;
+        //是否获得accept互斥锁
         ngx_accept_mutex_held = 0;
+        //获取锁失败后，等待下次执行的时间  
         ngx_accept_mutex_delay = ecf->accept_mutex_delay;
 
     } else {
@@ -605,18 +609,20 @@ ngx_event_process_init(ngx_cycle_t *cycle)
     if (ngx_event_timer_init(cycle->log) == NGX_ERROR) {
         return NGX_ERROR;
     }
-
+    //初始化事件驱动模块
     for (m = 0; cycle->modules[m]; m++) {
+        /*循环事件驱动模块，跳过模块类型为非NGX_EVENT_MODULE类型的模块*/  
+        //调用event/modules/*.c
         if (cycle->modules[m]->type != NGX_EVENT_MODULE) {
             continue;
         }
-
+        //如果非当前使用的模块则跳过( ngx_event_core_init_conf 定义)
         if (cycle->modules[m]->ctx_index != ecf->use) {
             continue;
         }
 
         module = cycle->modules[m]->ctx;
-
+        //初始化事件驱动
         if (module->actions.init(cycle, ngx_timer_resolution) != NGX_OK) {
             /* fatal */
             exit(2);
@@ -680,7 +686,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
     }
 
 #endif
-
+    //创建connections数组，保存连接信息
     cycle->connections =
         ngx_alloc(sizeof(ngx_connection_t) * cycle->connection_n, cycle->log);
     if (cycle->connections == NULL) {
@@ -688,7 +694,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
     }
 
     c = cycle->connections;
-
+    //创建读事件数组
     cycle->read_events = ngx_alloc(sizeof(ngx_event_t) * cycle->connection_n,
                                    cycle->log);
     if (cycle->read_events == NULL) {
@@ -700,7 +706,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
         rev[i].closed = 1;
         rev[i].instance = 1;
     }
-
+    //创建写事件数组
     cycle->write_events = ngx_alloc(sizeof(ngx_event_t) * cycle->connection_n,
                                     cycle->log);
     if (cycle->write_events == NULL) {
@@ -725,8 +731,9 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 
         next = &c[i];
     } while (i);
-
+    //初始化完成后，free_connections指向 cycle->connections第一个元素
     cycle->free_connections = next;
+    //设置剩余连接数
     cycle->free_connection_n = cycle->connection_n;
 
     /* for each listening socket */
@@ -818,7 +825,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
         }
 
 #else
-
+        //设置回调函数
         rev->handler = (c->type == SOCK_STREAM) ? ngx_event_accept
                                                 : ngx_event_recvmsg;
 
@@ -830,7 +837,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
         {
             continue;
         }
-
+        //添加事件
         if (ngx_add_event(rev, NGX_READ_EVENT, 0) == NGX_ERROR) {
             return NGX_ERROR;
         }
@@ -906,7 +913,7 @@ ngx_events_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     *(void **) conf = ctx;
-
+    //创建event模块配置
     for (i = 0; cf->cycle->modules[i]; i++) {
         if (cf->cycle->modules[i]->type != NGX_EVENT_MODULE) {
             continue;
@@ -927,7 +934,7 @@ ngx_events_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cf->ctx = ctx;
     cf->module_type = NGX_EVENT_MODULE;
     cf->cmd_type = NGX_EVENT_CONF;
-
+    //解析配置
     rv = ngx_conf_parse(cf, NULL);
 
     *cf = pcf;
@@ -935,7 +942,7 @@ ngx_events_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (rv != NGX_CONF_OK) {
         return rv;
     }
-
+    //初始化event模块配置
     for (i = 0; cf->cycle->modules[i]; i++) {
         if (cf->cycle->modules[i]->type != NGX_EVENT_MODULE) {
             continue;
@@ -1184,7 +1191,7 @@ static char *
 ngx_event_core_init_conf(ngx_cycle_t *cycle, void *conf)
 {
     ngx_event_conf_t  *ecf = conf;
-
+    //初始化事件驱动
 #if (NGX_HAVE_EPOLL) && !(NGX_TEST_BUILD_EPOLL)
     int                  fd;
 #endif
@@ -1251,7 +1258,7 @@ ngx_event_core_init_conf(ngx_cycle_t *cycle, void *conf)
         ngx_log_error(NGX_LOG_EMERG, cycle->log, 0, "no events module found");
         return NGX_CONF_ERROR;
     }
-
+    //初始化其他配置
     ngx_conf_init_uint_value(ecf->connections, DEFAULT_CONNECTIONS);
     cycle->connection_n = ecf->connections;
 
