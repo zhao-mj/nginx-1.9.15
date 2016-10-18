@@ -813,12 +813,14 @@ ngx_epoll_process_events(ngx_cycle_t *cycle, ngx_msec_t timer, ngx_uint_t flags)
             rev->ready = 1;
 
             if (flags & NGX_POST_EVENTS) {
+                //use accept lock
                 queue = rev->accept ? &ngx_posted_accept_events
                                     : &ngx_posted_events;
-
+                //定义于event/ngx_event_posted.h
                 ngx_post_event(rev, queue);
 
             } else {
+                //回调
                 rev->handler(rev);
             }
         }

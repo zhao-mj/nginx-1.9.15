@@ -359,7 +359,7 @@ ngx_http_init_connection(ngx_connection_t *c)
         rev->handler(rev);
         return;
     }
-
+    //设置超时事件
     ngx_add_timer(rev, c->listening->post_accept_timeout);
     ngx_reusable_connection(c, 1);
 

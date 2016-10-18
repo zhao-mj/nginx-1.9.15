@@ -239,7 +239,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     }
 
     delta = ngx_current_msec;
-
+    //#define ngx_process_events   ngx_event_actions.process_events
     (void) ngx_process_events(cycle, timer, flags);
 
     delta = ngx_current_msec - delta;
@@ -247,8 +247,11 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "timer delta: %M", delta);
 
+    //从ngx_posted_accept_events队列获取事件，执行回调函数
+    //ngx_posted_accept_events:accept请求队列(use accept lock情况下)
+    //event/ngx_event_posted.c
     ngx_event_process_posted(cycle, &ngx_posted_accept_events);
-
+    //释放accept锁
     if (ngx_accept_mutex_held) {
         ngx_shmtx_unlock(&ngx_accept_mutex);
     }
@@ -256,7 +259,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     if (delta) {
         ngx_event_expire_timers();
     }
-
+    //ngx_posted_events队列（写事件）
     ngx_event_process_posted(cycle, &ngx_posted_events);
 }
 
@@ -513,7 +516,7 @@ ngx_event_module_init(ngx_cycle_t *cycle)
 
     ngx_accept_mutex_ptr = (ngx_atomic_t *) shared;
     ngx_accept_mutex.spin = (ngx_uint_t) -1;
-
+    //设置accept文件锁配置
     if (ngx_shmtx_create(&ngx_accept_mutex, (ngx_shmtx_sh_t *) shared,
                          cycle->lock_file.data)
         != NGX_OK)
@@ -565,7 +568,7 @@ ngx_timer_signal_handler(int signo)
 
 #endif
 
-
+//初始化事件处理函数
 static ngx_int_t
 ngx_event_process_init(ngx_cycle_t *cycle)
 {
@@ -602,7 +605,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
     ngx_use_accept_mutex = 0;
 
 #endif
-
+    //初始化accept请求队列（使用accept锁）
     ngx_queue_init(&ngx_posted_accept_events);
     ngx_queue_init(&ngx_posted_events);
 

@@ -18,7 +18,7 @@ static void ngx_debug_accepted_connection(ngx_event_conf_t *ecf,
     ngx_connection_t *c);
 #endif
 
-
+//accept事件
 void
 ngx_event_accept(ngx_event_t *ev)
 {
@@ -59,7 +59,7 @@ ngx_event_accept(ngx_event_t *ev)
 
     do {
         socklen = NGX_SOCKADDRLEN;
-
+        //获取客户端连接
 #if (NGX_HAVE_ACCEPT4)
         if (use_accept4) {
             s = accept4(lc->fd, (struct sockaddr *) sa, &socklen,
@@ -138,7 +138,7 @@ ngx_event_accept(ngx_event_t *ev)
 #if (NGX_STAT_STUB)
         (void) ngx_atomic_fetch_add(ngx_stat_accepted, 1);
 #endif
-
+        //当前进程的空闲进程数小于1/8时,则禁止accept一段时间
         ngx_accept_disabled = ngx_cycle->connection_n / 8
                               - ngx_cycle->free_connection_n;
 
@@ -203,7 +203,7 @@ ngx_event_accept(ngx_event_t *ev)
         }
 
         *log = ls->log;
-
+        //io设置
         c->recv = ngx_recv;
         c->send = ngx_send;
         c->recv_chain = ngx_recv_chain;
@@ -308,7 +308,7 @@ ngx_event_accept(ngx_event_t *ev)
 
         log->data = NULL;
         log->handler = NULL;
-
+        //回调http函数,定义位于http/ngx_http.c模块ngx_http_init_listening()
         ls->handler(c);
 
         if (ngx_event_flags & NGX_USE_KQUEUE_EVENT) {
@@ -639,7 +639,8 @@ ngx_event_recvmsg(ngx_event_t *ev)
 
 ngx_int_t
 ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
-{
+{   
+    //src/cpre/ngx_shmtx.c
     if (ngx_shmtx_trylock(&ngx_accept_mutex)) {
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
@@ -648,7 +649,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
         if (ngx_accept_mutex_held && ngx_accept_events == 0) {
             return NGX_OK;
         }
-
+        //启动accept事件
         if (ngx_enable_accept_events(cycle) == NGX_ERROR) {
             ngx_shmtx_unlock(&ngx_accept_mutex);
             return NGX_ERROR;

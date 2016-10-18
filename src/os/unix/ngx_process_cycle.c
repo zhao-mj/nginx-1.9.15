@@ -758,7 +758,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
         }
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "worker cycle");
-
+        //event/ngx_event.c
         ngx_process_events_and_timers(cycle);
 
         if (ngx_terminate) {
@@ -905,7 +905,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
     for (i = 0; i < cycle->listening.nelts; i++) {
         ls[i].previous = NULL;
     }
-
+    //初始化init_process
     for (i = 0; cycle->modules[i]; i++) {
         if (cycle->modules[i]->init_process) {
             if (cycle->modules[i]->init_process(cycle) == NGX_ERROR) {
