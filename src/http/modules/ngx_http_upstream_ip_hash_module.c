@@ -242,7 +242,7 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
     return NGX_OK;
 }
 
-
+//ip_hash
 static char *
 ngx_http_upstream_ip_hash(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {

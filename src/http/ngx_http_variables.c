@@ -151,13 +151,13 @@ static ngx_int_t ngx_http_variable_time_local(ngx_http_request_t *r,
  */
 
 static ngx_http_variable_t  ngx_http_core_variables[] = {
-
+    //host
     { ngx_string("http_host"), NULL, ngx_http_variable_header,
       offsetof(ngx_http_request_t, headers_in.host), 0, 0 },
-
+    //浏览器参数
     { ngx_string("http_user_agent"), NULL, ngx_http_variable_header,
       offsetof(ngx_http_request_t, headers_in.user_agent), 0, 0 },
-
+    //referer参数
     { ngx_string("http_referer"), NULL, ngx_http_variable_header,
       offsetof(ngx_http_request_t, headers_in.referer), 0, 0 },
 

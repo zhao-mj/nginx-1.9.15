@@ -142,7 +142,7 @@ static ngx_path_init_t  ngx_http_client_temp_path = {
 
 
 #if (NGX_HTTP_GZIP)
-
+//http版本号
 static ngx_conf_enum_t  ngx_http_gzip_http_version[] = {
     { ngx_string("1.0"), NGX_HTTP_VERSION_10 },
     { ngx_string("1.1"), NGX_HTTP_VERSION_11 },
@@ -314,6 +314,7 @@ static ngx_command_t  ngx_http_core_commands[] = {
       offsetof(ngx_http_core_loc_conf_t, default_type),
       NULL },
 
+    //location的上一级路径
     { ngx_string("root"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
                         |NGX_CONF_TAKE1,
@@ -322,6 +323,7 @@ static ngx_command_t  ngx_http_core_commands[] = {
       0,
       NULL },
 
+    //文件路径，与root不同的是alias使用完整的路径（含 location目录）
     { ngx_string("alias"),
       NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_http_core_root,
@@ -3393,7 +3395,7 @@ ngx_http_core_type(ngx_conf_t *cf, ngx_command_t *dummy, void *conf)
     return NGX_CONF_OK;
 }
 
-
+//初始化配置
 static ngx_int_t
 ngx_http_core_preconfiguration(ngx_conf_t *cf)
 {
@@ -3516,6 +3518,7 @@ ngx_http_core_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->request_pool_size, 4096);
     ngx_conf_merge_msec_value(conf->client_header_timeout,
                               prev->client_header_timeout, 60000);
+    //客户端请求头大小
     ngx_conf_merge_size_value(conf->client_header_buffer_size,
                               prev->client_header_buffer_size, 1024);
     ngx_conf_merge_bufs_value(conf->large_client_header_buffers,

@@ -3,7 +3,16 @@
  * Copyright (C) Igor Sysoev
  * Copyright (C) Nginx, Inc.
  */
-
+/*
+ *
+upstream XXXX{#定义负载均衡设备的Ip及设备状态 
+    ip_hash; 
+    server 127.0.0.1:9090 down; 
+    server 127.0.0.1:8080 weight=2; 
+    server 127.0.0.1:6060; 
+    server 127.0.0.1:7070 backup; 
+} 
+ */
 
 #include <ngx_config.h>
 #include <ngx_core.h>
@@ -5507,7 +5516,14 @@ ngx_http_upstream(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
     return rv;
 }
 
-
+/**
+ * upstream模块 server配置解析
+ * for example：
+   upstream{
+       server XXX;
+       server XXX; 
+   }
+ */
 static char *
 ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
@@ -5534,7 +5550,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     fail_timeout = 10;
 
     for (i = 2; i < cf->args->nelts; i++) {
-
+        //权重配置
         if (ngx_strncmp(value[i].data, "weight=", 7) == 0) {
 
             if (!(uscf->flags & NGX_HTTP_UPSTREAM_WEIGHT)) {
@@ -5549,7 +5565,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             continue;
         }
-
+        //允许请求失败的次数默认为1.当超过最大次数时，返回proxy_next_upstream 模块定义的错误 
         if (ngx_strncmp(value[i].data, "max_fails=", 10) == 0) {
 
             if (!(uscf->flags & NGX_HTTP_UPSTREAM_MAX_FAILS)) {
@@ -5564,7 +5580,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             continue;
         }
-
+        //max_fails次失败后，暂停的时间
         if (ngx_strncmp(value[i].data, "fail_timeout=", 13) == 0) {
 
             if (!(uscf->flags & NGX_HTTP_UPSTREAM_FAIL_TIMEOUT)) {
@@ -5582,7 +5598,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             continue;
         }
-
+        //该服务器是备用服务器,只有其它后端服务器都挂了或者很忙才会访问到
         if (ngx_strcmp(value[i].data, "backup") == 0) {
 
             if (!(uscf->flags & NGX_HTTP_UPSTREAM_BACKUP)) {
@@ -5593,7 +5609,7 @@ ngx_http_upstream_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             continue;
         }
-
+        //服务器已经停用
         if (ngx_strcmp(value[i].data, "down") == 0) {
 
             if (!(uscf->flags & NGX_HTTP_UPSTREAM_DOWN)) {

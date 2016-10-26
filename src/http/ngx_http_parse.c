@@ -157,6 +157,7 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
             break;
 
         case sw_method:
+            //请求方法
             if (ch == ' ') {
                 r->method_end = p - 1;
                 m = r->request_start;

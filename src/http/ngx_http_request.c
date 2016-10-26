@@ -309,6 +309,7 @@ ngx_http_init_connection(ngx_connection_t *c)
     c->log_error = NGX_ERROR_INFO;
 
     rev = c->read;
+    //设置回调函数
     rev->handler = ngx_http_wait_request_handler;
     c->write->handler = ngx_http_empty_handler;
 
@@ -350,7 +351,7 @@ ngx_http_init_connection(ngx_connection_t *c)
 
     if (rev->ready) {
         /* the deferred accept(), iocp */
-
+        //延迟accept
         if (ngx_use_accept_mutex) {
             ngx_post_event(rev, &ngx_posted_events);
             return;
@@ -359,7 +360,7 @@ ngx_http_init_connection(ngx_connection_t *c)
         rev->handler(rev);
         return;
     }
-    //设置超时事件
+    //设置超时定时器
     ngx_add_timer(rev, c->listening->post_accept_timeout);
     ngx_reusable_connection(c, 1);
 
@@ -369,7 +370,7 @@ ngx_http_init_connection(ngx_connection_t *c)
     }
 }
 
-
+//等http请求处理
 static void
 ngx_http_wait_request_handler(ngx_event_t *rev)
 {
@@ -398,7 +399,7 @@ ngx_http_wait_request_handler(ngx_event_t *rev)
 
     hc = c->data;
     cscf = ngx_http_get_module_srv_conf(hc->conf_ctx, ngx_http_core_module);
-
+    //客户端请求头大小
     size = cscf->client_header_buffer_size;
 
     b = c->buffer;
@@ -463,7 +464,7 @@ ngx_http_wait_request_handler(ngx_event_t *rev)
     }
 
     b->last += n;
-
+    //代理
     if (hc->proxy_protocol) {
         hc->proxy_protocol = 0;
 
@@ -909,7 +910,9 @@ ngx_http_ssl_servername(ngx_ssl_conn_t *ssl_conn, int *ad, void *arg)
 
 #endif
 
-
+/**
+ * 处理请求行数据
+ */
 static void
 ngx_http_process_request_line(ngx_event_t *rev)
 {
@@ -937,13 +940,14 @@ ngx_http_process_request_line(ngx_event_t *rev)
     for ( ;; ) {
 
         if (rc == NGX_AGAIN) {
+            //读取请求行数据
             n = ngx_http_read_request_header(r);
 
             if (n == NGX_AGAIN || n == NGX_ERROR) {
                 return;
             }
         }
-
+        //解析请求行
         rc = ngx_http_parse_request_line(r, r->header_in);
 
         if (rc == NGX_OK) {
@@ -1019,6 +1023,7 @@ ngx_http_process_request_line(ngx_event_t *rev)
             c->log->action = "reading client request headers";
 
             rev->handler = ngx_http_process_request_headers;
+            //读取请求头
             ngx_http_process_request_headers(rev);
 
             return;
@@ -1175,7 +1180,7 @@ ngx_http_process_request_uri(ngx_http_request_t *r)
     return NGX_OK;
 }
 
-
+//读取请求头信息
 static void
 ngx_http_process_request_headers(ngx_event_t *rev)
 {
@@ -1338,7 +1343,7 @@ ngx_http_process_request_headers(ngx_event_t *rev)
             if (rc != NGX_OK) {
                 return;
             }
-
+            //处理请求头
             ngx_http_process_request(r);
 
             return;
