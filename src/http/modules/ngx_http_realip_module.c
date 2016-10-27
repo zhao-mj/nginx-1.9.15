@@ -364,7 +364,7 @@ ngx_http_realip(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         rlcf->type = NGX_HTTP_REALIP_XREALIP;
         return NGX_CONF_OK;
     }
-
+    //客户端真实ip地址
     if (ngx_strcmp(value[1].data, "X-Forwarded-For") == 0) {
         rlcf->type = NGX_HTTP_REALIP_XFWD;
         return NGX_CONF_OK;

@@ -442,21 +442,24 @@ static ngx_command_t  ngx_http_proxy_commands[] = {
       NULL },
 
 #if (NGX_HTTP_CACHE)
-
+    //指定缓存模块
+    //for example : proxy_cache cache_one;
     { ngx_string("proxy_cache"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_http_proxy_cache,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
-
+    //代理缓存key
+    //for example : proxy_cache_key $host:$server_port$request_uri;
     { ngx_string("proxy_cache_key"),
       NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_http_proxy_cache_key,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
-
+    //缓存路径
+    //for example:proxy_cache_path /tmp/proxy_cache levels=1:2 keys_zone=cache_one:500m inactive=1d max_size=10g;  
     { ngx_string("proxy_cache_path"),
       NGX_HTTP_MAIN_CONF|NGX_CONF_2MORE,
       ngx_http_file_cache_set_slot,
