@@ -324,7 +324,7 @@ ngx_http_upstream_header_t  ngx_http_upstream_headers_in[] = {
 
 
 static ngx_command_t  ngx_http_upstream_commands[] = {
-
+    //upstream{...}模块
     { ngx_string("upstream"),
       NGX_HTTP_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_TAKE1,
       ngx_http_upstream,
@@ -502,7 +502,7 @@ ngx_http_upstream_init(ngx_http_request_t *r)
         return;
     }
 #endif
-
+    //如果设置了读事件超时，则删除定时器
     if (c->read->timer_set) {
         ngx_del_timer(c->read);
     }
@@ -542,7 +542,7 @@ ngx_http_upstream_init_request(ngx_http_request_t *r)
     u = r->upstream;
 
 #if (NGX_HTTP_CACHE)
-
+    //http缓存
     if (u->conf->cache) {
         ngx_int_t  rc;
 

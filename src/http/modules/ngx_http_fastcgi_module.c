@@ -662,7 +662,7 @@ ngx_http_fastcgi_handler(ngx_http_request_t *r)
 #if (NGX_HTTP_CACHE)
     ngx_http_fastcgi_main_conf_t  *fmcf;
 #endif
-
+    //创建upstream
     if (ngx_http_upstream_create(r) != NGX_OK) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
@@ -695,9 +695,10 @@ ngx_http_fastcgi_handler(ngx_http_request_t *r)
     u->caches = &fmcf->caches;
     u->create_key = ngx_http_fastcgi_create_key;
 #endif
-
+    //设置create_request回调函数
     u->create_request = ngx_http_fastcgi_create_request;
     u->reinit_request = ngx_http_fastcgi_reinit_request;
+    //设置process_header回调函数
     u->process_header = ngx_http_fastcgi_process_header;
     u->abort_request = ngx_http_fastcgi_abort_request;
     u->finalize_request = ngx_http_fastcgi_finalize_request;

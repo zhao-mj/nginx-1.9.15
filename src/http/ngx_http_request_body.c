@@ -26,6 +26,7 @@ static ngx_int_t ngx_http_request_body_chunked_filter(ngx_http_request_t *r,
     ngx_chain_t *in);
 
 
+//http body处理
 ngx_int_t
 ngx_http_read_client_request_body(ngx_http_request_t *r,
     ngx_http_client_body_handler_pt post_handler)
@@ -78,7 +79,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
     rb->post_handler = post_handler;
 
     r->request_body = rb;
-
+    //当http body长度未知 且 无Transfer-Encoding:chunked头信息时，则调用回调函数
     if (r->headers_in.content_length_n < 0 && !r->headers_in.chunked) {
         r->request_body_no_buffering = 0;
         post_handler(r);

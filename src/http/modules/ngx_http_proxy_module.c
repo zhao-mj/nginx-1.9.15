@@ -251,7 +251,12 @@ ngx_module_t  ngx_http_proxy_module;
 
 
 static ngx_command_t  ngx_http_proxy_commands[] = {
-
+    /**
+        location /test/
+        {
+            proxy_pass http://XXX;  
+        }
+     */
     { ngx_string("proxy_pass"),
       NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_HTTP_LMT_CONF|NGX_CONF_TAKE1,
       ngx_http_proxy_pass,
@@ -3656,13 +3661,14 @@ ngx_http_proxy_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         return NGX_CONF_OK;
     }
-
+    
     if (ngx_strncasecmp(url->data, (u_char *) "http://", 7) == 0) {
+        //http代理
         add = 7;
         port = 80;
 
     } else if (ngx_strncasecmp(url->data, (u_char *) "https://", 8) == 0) {
-
+      //https代理
 #if (NGX_HTTP_SSL)
         plcf->ssl = 1;
 
